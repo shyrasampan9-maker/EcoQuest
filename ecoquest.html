@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoQuest</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #eef8ee;
+  color: #21452b;
+  margin: 0;
+  padding: 20px;
+}
+
+main {
+  max-width: 650px;
+  margin: auto;
+}
+
+header, section {
+  background: white;
+  padding: 20px;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+h1 {
+  color: #23834b;
+}
+
+button {
+  background: #23834b;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+button:disabled {
+  background: #aaa;
+  cursor: default;
+}
+
+.challenge {
+  border-bottom: 1px solid #ddd;
+  padding: 12px 0;
+}
+
+#points {
+  font-size: 28px;
+  font-weight: bold;
+  color: #23834b;
+}
+</style>
+</head>
+
+<body>
+<main>
+
+<header>
+<h1>🌱 EcoQuest</h1>
+<p>Small Actions. Greener Future.</p>
+<p>Your Eco-Points:</p>
+<div id="points">0</div>
+<p id="progress">0 challenges completed</p>
+</header>
+
+<section>
+<h2>🌿 Today's Eco-Challenges</h2>
+<div id="challenges"></div>
+</section>
+
+<section>
+<h2>🌍 Eco Quiz</h2>
+<p id="question"></p>
+<div id="answers"></div>
+<p id="quizResult"></p>
+<button onclick="nextQuestion()">Next Question</button>
+</section>
+
+<section>
+<h2>💡 Eco Reminder</h2>
+<p id="tip">Every small action can make a difference!</p>
+<button onclick="newTip()">Get a Tip</button>
+</section>
+
+</main>
+
+<script>
+const tasks = [
+ "Bring a reusable water bottle",
+ "Switch off unused lights",
+ "Avoid single-use plastic",
+ "Segregate your waste properly",
+ "Save water while washing"
+];
+
+let completed = JSON.parse(
+ localStorage.getItem("ecoDone") || "[]"
+);
+
+let points = Number(
+ localStorage.getItem("ecoPoints") || 0
+);
+
+function render() {
+ document.getElementById("points").textContent = points;
+
+ document.getElementById("progress").textContent =
+ completed.length + " of " +
+ tasks.length + " challenges completed";
+
+ document.getElementById("challenges").innerHTML =
+ tasks.map((task, i) => `
+  <div class="challenge">
+   <p>${task}</p>
+   <button onclick="finish(${i})"
+    ${completed.includes(i) ? "disabled" : ""}>
+    ${completed.includes(i) ? "Completed ✓" : "Complete +10"}
+   </button>
+  </div>
+ `).join("");
+}
+
+function finish(i) {
+ if (completed.includes(i)) return;
+
+ completed.push(i);
+ points += 10;
+
+ localStorage.setItem("ecoDone", JSON.stringify(completed));
+ localStorage.setItem("ecoPoints", points);
+
+ render();
+}
+
+const quiz = [
+ {
+  q: "Which helps reduce plastic waste?",
+  a: ["Use reusable bags", "Use more plastic bags", "Throw plastic anywhere"],
+  correct: 0
+ },
+ {
+  q: "What should you do when a light is not needed?",
+  a: ["Leave it on", "Switch it off", "Make it brighter"],
+  correct: 1
+ },
+ {
+  q: "Which is a water-saving habit?",
+  a: ["Leave the tap running", "Waste water", "Turn off the tap when not in use"],
+  correct: 2
+ }
+];
+
+let qIndex = 0;
+
+function showQuestion() {
+ let q = quiz[qIndex];
+
+ document.getElementById("question").textContent = q.q;
+ document.getElementById("quizResult").textContent = "";
+
+ document.getElementById("answers").innerHTML =
+ q.a.map((answer, i) => `
+  <button onclick="answer(${i})">${answer}</button><br>
+ `).join("");
+}
+
+function answer(i) {
+ let result = document.getElementById("quizResult");
+
+ if (i === quiz[qIndex].correct) {
+  result.textContent = "Correct! 🌱";
+ } else {
+  result.textContent = "Not quite. Try learning the answer!";
+ }
+}
+
+function nextQuestion() {
+ qIndex = (qIndex + 1) % quiz.length;
+ showQuestion();
+}
+
+const tips = [
+ "Use reusable containers instead of disposable ones.",
+ "Turn off appliances when they are not in use.",
+ "Segregate recyclables from residual waste.",
+ "Bring your own reusable shopping bag.",
+ "Don't waste water when washing your hands."
+];
+
+function newTip() {
+ document.getElementById("tip").textContent =
+ tips[Math.floor(Math.random() * tips.length)];
+}
+
+render();
+showQuestion();
+</script>
+
+</body>
+</html>
